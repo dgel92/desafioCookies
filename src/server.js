@@ -1,7 +1,7 @@
 import { __dirname } from './utils.js';
-import cookieParser from "cookie-parser";
+import cookieParser from 'cookie-parser';
 import express from "express";
-import handlebars from "express-handlebars";
+import handlebars from 'express-handlebars';
 import { isAdmin } from './middlewares/isAdmin.js';
 import loginRouter from "./routes/login.router.js";
 import session from 'express-session';
@@ -11,12 +11,19 @@ import viewsRouter from "./routes/views.router.js";
 const app = express();
 
 
-const sessionConfig = {
+/*const sessionConfig = {
     secret: "123456",
     cookie: {maxAge: 60000},
     saveUninitialized: true,
     resave: false
 }
+*/
+
+const secret = '123456';
+
+app.use(cookieParser(secret));
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 
 const users = [
     {
@@ -31,6 +38,19 @@ const users = [
     }
 ];
 
+app.use('/login', loginRouter);
+app.use('/', viewsRouter);
+
+app.engine('handlebars', handlebars.engine());
+app.set('views', __dirname + '/views');
+app.set('view engine', 'handlebars');
+
+app.listen(8080, ()=>{
+console.log('🚀 Server listening on port 8080');
+});
+
+
+/*
 app.use(session(sessionConfig));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
@@ -61,7 +81,7 @@ app.use("/", viewsRouter)
 
 app.engine("handlebars", handlebars.engine())
 app.set("views", __dirname + "/views")
-app.set("view engine", "/hanblebars")
+app.set("view engine", "hanblebars")
 
 app.get('/set-cookie', (req, res) => {
     res.cookie('idioma', 'ingles').json({msg: 'ok'})
@@ -123,3 +143,5 @@ app.get("/", (req, res)=>{
 app.listen(8080, ()=>{
 console.log('🚀 Server listening on port 8080');
 });
+
+*/
