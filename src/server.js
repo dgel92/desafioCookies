@@ -2,21 +2,22 @@ import { __dirname } from './utils.js';
 import cookieParser from "cookie-parser";
 import express from "express";
 import handlebars from "express-handlebars";
+import { isAdmin } from './middlewares/isAdmin.js';
 import loginRouter from "./routes/login.router.js";
 import session from 'express-session';
-import viewsRouter from "./routes/views.router.js"
+import { validateLogin } from './middlewares/validateLogin.js';
+import viewsRouter from "./routes/views.router.js";
 
 const app = express();
 
 
 const sessionConfig = {
     secret: "123456",
-    cookie: {maxAge: 20000},
+    cookie: {maxAge: 60000},
     saveUninitialized: true,
     resave: false
 }
 
-app.use(session(sessionConfig));
 const users = [
     {
         username: "juan",
@@ -30,6 +31,10 @@ const users = [
     }
 ];
 
+app.use(session(sessionConfig));
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+
 app.post("/login", (req, res) =>{
     const {username, password}= req.body
     const index = users.findIndex((user)=> user.username === username && user.password === password)
@@ -39,6 +44,7 @@ app.post("/login", (req, res) =>{
     } else{
         const user = users[index];
         req.session.info = {
+            name: user.name,
             loggedIn : true,
             count: 1,
             admin: user.admin
@@ -48,8 +54,7 @@ app.post("/login", (req, res) =>{
 })
 
  //app.use(cookieParser(secret));
-app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+
 
 app.use("/login", loginRouter)
 app.use("/", viewsRouter)
@@ -81,6 +86,39 @@ app.get('/', (req, res) => {
     // res.clearCookie('idioma')
     // res.send('ok')
 });
+
+app.get("/secret-endpoint", validateLogin,(req, res) =>{
+    req.session.info.count++;
+    res.json({
+        message: "info secreta",
+        count: req.session.info.count,
+        session: req.session
+    })
+});
+
+app.get("/admin-endpoint", validateLogin, isAdmin, (req, res)=>{
+    req.session.info.count++;
+    res.json({
+        msg:"aca van los admin",
+        count: req.session.info.count,
+        session: req.session
+    })
+});
+
+app.post("/logout",(req, res)=>{
+    req.session.destroy();
+    res.json({msg:"sesion destruida"})
+})
+
+
+app.get("/", (req, res)=>{
+    const {name} = req.query;
+    if(name){
+        req.session.name = name;
+    }
+    const msj = req.session.info.name? `Bienvenido ${req.session.name}!` : 'Bienvenido';
+    res.json(msj)
+})
 
 app.listen(8080, ()=>{
 console.log('🚀 Server listening on port 8080');
