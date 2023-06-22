@@ -1,16 +1,75 @@
+import "./db/database.js";
+
+import MongoStore from "connect-mongo";
+import { __dirname } from "./utils";
 import cookieParser from 'cookie-parser';
 import express from "express";
-import mainRouter from "./routes/user.router.js"
-import session from 'express-session';
-import sessionFileStore from "session-file-store"
+import handlebars from 'express-handlebars'
+import mongoStore from 'connect-mongo'
+import usersRouter from "./routes/user.router.js"
+import viewsRouter from "./views.router.js/"
 
-const FileStore = sessionFileStore(session)
+const storeOptions = {
+    store: new MongoStore.create({
+        mongoUrl: 'mongodb+srv://admin:6sV95ut00BcLdSB2@cluster0.vcskbbl.mongodb.net/coderhouse',
+        crypto:{
+            secret: '123456'
+        },
+        autoRemove: "interval",
+        ttl: 180
+    }),
+    secret: "1234",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 180000
+    }
+}
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({extended: true}))
+app.use(cookieParser());
+
+app.engine("handlebars", handlebars.engine())
+app.set("views", __dirname+"/views")
+app.set("view engine", "handlebars")
+
+app.use(
+    session({
+        secret:"sessionKey",
+        resave: false,
+        saveUninitialized: true,
+        cookie:{
+            maxAge: 20000
+        },
+        store: new MongoStore({
+            mongoURL: 'mongodb+srv://admin:6sV95ut00BcLdSB2@cluster0.vcskbbl.mongodb.net/coderhouse',
+            autoRemove: "interval",
+            ttl: 20,
+            crypto:{
+                secret:"1234",
+            },
+        }),
+    })
+);
+
+app.use('/users',usersRouter)
+app.use('/views',viewsRouter)
+
+const PORT = 8080
+app.listen(PORT, () => {
+    console.log(`Escuchando al puerto ${PORT}`)
+})
+
+
+/*const FileStore = sessionFileStore(session)
 
 const fileStoreOptions={
     store: new FileStore({
         path: "./sessions",
         ttl: 1800, 
-        reapInterval: 60
+        //reapInterval: 60
     }),
     secret: "1234",
     resave: false,
@@ -33,3 +92,6 @@ app.listen(PORT, ()=>{
     });
 
     export default app
+    */
+
+    //mongodb+srv://admin:<6sV95ut00BcLdSB2>@cluster0.vcskbbl.mongodb.net/

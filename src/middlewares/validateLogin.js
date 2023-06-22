@@ -1,5 +1,5 @@
-export const validateLogin = (req, res, next) =>{
+export const validateLogIn = (req, res, next) => {
     console.log(req.session);
-    if(req.session.info && req.session.infologgedIn) next()
-        else res.status(401).json({message:"no autorizado"})
-    }
+    if (req.session.info && req.session.info.loggedIn) next();
+    else res.status(401).json({ msg: 'no estas autorizado' });
+};
