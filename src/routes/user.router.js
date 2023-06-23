@@ -1,8 +1,9 @@
 import { Router } from "express";
 import UserDao from './../daos/user.dao.js';
 
-const UserDao = new UserDao
-const router  = Router();
+const userDao = new UserDao()
+
+const router = Router()
 
 router.post('/register', async (req, res) => {
     try {
@@ -32,10 +33,6 @@ router.post('/login', async (req, res) => {
         console.log(error);
     }
 })
-
-router.get("/info", validateLogIn,infoSession);
-router.get("/secret-endpoint", validateLogIn, visit);
-router.post("/logout", logout);
 
 
 export default router;

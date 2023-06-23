@@ -1,30 +1,13 @@
-import "./db/database.js";
+import './db/database.js'
 
-import MongoStore from "connect-mongo";
-import { __dirname } from "./utils";
-import cookieParser from 'cookie-parser';
-import express from "express";
+import { __dirname } from './utils.js'
+import cookieParser from 'cookie-parser'
+import express from 'express'
 import handlebars from 'express-handlebars'
 import mongoStore from 'connect-mongo'
-import usersRouter from "./routes/user.router.js"
-import viewsRouter from "./views.router.js/"
-
-const storeOptions = {
-    store: new MongoStore.create({
-        mongoUrl: 'mongodb+srv://admin:6sV95ut00BcLdSB2@cluster0.vcskbbl.mongodb.net/coderhouse',
-        crypto:{
-            secret: '123456'
-        },
-        autoRemove: "interval",
-        ttl: 180
-    }),
-    secret: "1234",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 180000
-    }
-}
+import session from 'express-session'
+import usersRouter from './routes/user.router.js'
+import viewsRouter from './routes/views.router.js'
 
 const app = express();
 app.use(express.json());
@@ -43,8 +26,8 @@ app.use(
         cookie:{
             maxAge: 20000
         },
-        store: new MongoStore({
-            mongoURL: 'mongodb+srv://admin:6sV95ut00BcLdSB2@cluster0.vcskbbl.mongodb.net/coderhouse',
+        store: new mongoStore({
+            mongoUrl: 'mongodb+srv://admin:6sV95ut00BcLdSB2@cluster0.vcskbbl.mongodb.net/coderhouse',
             autoRemove: "interval",
             ttl: 20,
             crypto:{
@@ -62,6 +45,23 @@ app.listen(PORT, () => {
     console.log(`Escuchando al puerto ${PORT}`)
 })
 
+
+/*const storeOptions = {
+    store: new MongoStore.create({
+        mongoUrl: 'mongodb+srv://admin:6sV95ut00BcLdSB2@cluster0.vcskbbl.mongodb.net/coderhouse',
+        crypto:{
+            secret: '123456'
+        },
+        autoRemove: "interval",
+        ttl: 180
+    }),
+    secret: "1234",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 180000
+    }
+}*/
 
 /*const FileStore = sessionFileStore(session)
 
